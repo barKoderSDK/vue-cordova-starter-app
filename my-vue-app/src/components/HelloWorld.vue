@@ -65,7 +65,7 @@ export default {
         const boundingRect = await barkoderViewRef.value.getBoundingClientRect();
 
         window.Barkoder.registerWithLicenseKey({
-          licenseKey: 'PEmBIohr9EZXgCkySoetbwP4gvOfMcGzgxKPL2X6uqOwK84cW10cfvFY-1sdH4GoyNZ6AdG0TbTlxI4s8s9ocSNuPsdTs5ZzSEf6g5uEWOqrbj3dRpGVynEdw1Vx-JJikB8KrKWJkz6Bg-FQMrHqeU9bRa_N_nvhG-vHxdWIY66AIBxIpXbehKTNDLKWsVyeISUkZ7XcCHDnSJRGT-SZk9rmUQrmopNQ2doMEdy4G3PxFpWBKykGGIE3ftq6bCQB8tWc02eg60lAO2MDyHkIzeLX0kxcc4_-zOzYe8y015RRgRgmmAW_0u8LCVqOxll3'
+          licenseKey: 'ADD_YOUR_LICENSE_KEY_HERE'
         });
 
         await new Promise((resolve, reject) => {
