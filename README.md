@@ -104,8 +104,9 @@ Cordova is a cross-platform app runtime that makes it easy to build web apps tha
       <script src="cordova.js"></script>
    ```
 9. **Test and Run Your App:**
+    > back to cordova project root
   ```bash
-    cd .. (back to cordova project root)
+    cd .. 
     cordova build android
     cordova run android or cordova run ios
    ```
