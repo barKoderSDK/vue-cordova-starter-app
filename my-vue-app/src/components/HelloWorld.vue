@@ -64,9 +64,7 @@ export default {
       try {
         const boundingRect = await barkoderViewRef.value.getBoundingClientRect();
 
-        window.Barkoder.registerWithLicenseKey({
-          licenseKey: 'ADD_YOUR_LICENSE_KEY_HERE'
-        });
+        window.Barkoder.registerWithLicenseKey('ADD_YOUR_LICENSE_KEY_HERE');
 
         await new Promise((resolve, reject) => {
           window.Barkoder.initialize(
