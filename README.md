@@ -254,6 +254,8 @@ export default {
 </style>
 
    ```
+
+10. **If cannot read from BarkoderConfig.ts** - In plugins/barkoder-cordova-plugin/www/ -> create file BarkoderConfig.js that is coppy from BarkoderConfig.ts 
   
 
  
