@@ -1,5 +1,5 @@
 <template>
-  <img width="280" alt="Vue logo" src="./assets/logo.png">
+  <!-- <img height="55" alt="Vue logo" src="./assets/logo.png"> -->
   <HelloWorld msg="Welcome to Your Vue.js App"/>
 </template>
 
@@ -21,6 +21,13 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  padding: 0;
+  margin: 0;
 }
 </style>
