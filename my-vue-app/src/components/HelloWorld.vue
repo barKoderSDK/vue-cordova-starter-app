@@ -353,7 +353,7 @@ export default {
         const boundingRect = await barkoderViewRef.value.getBoundingClientRect();
 
         window.Barkoder.registerWithLicenseKey('Your_license_key');
-
+        
         await new Promise((resolve, reject) => {
           window.Barkoder.initialize(
              Math.round(boundingRect.width),
