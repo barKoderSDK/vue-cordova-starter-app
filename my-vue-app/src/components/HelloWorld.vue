@@ -2,12 +2,12 @@
   <div id="container">
     <div class="app_title" :style="{backgroundPosition: isScanning || scannedResult?.thumbnailImage  ? 'top' : 'bottom' }">
       <div class="title_settings_container">
-        <!-- <h4 v-if="isScanning && !scannedResult?.thumbnailImage" @click="stopScanning">Back</h4> -->
         <img v-if="isScanning && !scannedResult?.thumbnailImage" @click="stopScanning" alt="touch icon" src="../assets/close.svg">
         <h2 style="width: 100%;">Cordova + Vue</h2>
         <img alt="settings icon" src="../assets/Settings.svg" @click="handleSettingsClick"> 
       </div>
     </div>
+    
     <div id="barkoderView" ref="barkoderView" style="height: 85vh" :style="{ minHeight: scannedResult?.thumbnailImage && !isScanning ? '85vh' : '85vh', top:   '60px'  }">
       <img v-if="scannedResult?.resultImage" class="fullResultImage" :src="scannedResult?.resultImage" @click="startScanning" alt="Scanned Thumbnail" />
       <div v-if="scannedResult?.resultImage" class="tap_anywhere_popup" @click="startScanning">
@@ -15,9 +15,6 @@
         <span>Tap anywhere to continue</span>
       </div>
     </div>
-
-
-
 
     <div class="btnContainer" :style="{borderRadius: !isScanning ? '28px 28px 0 0' : '0 0 0 0'}" :class="{ 'animate-btnContainer': scannedResult?.type  }">
         <div v-if="scannedResult?.type" class="resultContainer">
@@ -28,8 +25,8 @@
           <div class="result_text_img">
             <span class="result_title"> {{ scannedResult.type }}</span>
             <img v-if="scannedResult?.thumbnailImage" class="resultImage" :src="scannedResult?.thumbnailImage" alt="Scanned Thumbnail" />
-            <p>Result:
-              <a :href="scannedResult.textualData"> {{ scannedResult.textualData }} </a>
+            <p class="result_desc">Result:
+              <a class="result_link" :href="scannedResult.textualData"> {{ scannedResult.textualData }} </a>
             </p>
           </div>
           <div class="results_btn_container">
@@ -58,7 +55,6 @@
           </div>
         </div>
       </div>
-   
     </div>
 
     <div id="settingsPopup" v-if="isSettingsPopupVisible" >
@@ -111,19 +107,16 @@
       <div class="settings_title">
         <h3 style="margin: 0">Scanning Mode Settings</h3>
       </div>
-      <div class="settings_item">
+      <div class="settings_item" @click="handleOpenCodesPopup('1d')">
         <span>All 1D Codes</span>
+        <div class="arrow_settings_container" > <img alt="right icon" src="../assets/right_arrow.svg">  </div>
+      </div>
+      <div class="settings_item" @click="handleOpenCodesPopup('2d')">
+        <span>All 2D Codes</span>
         <div class="arrow_settings_container"> <img alt="right icon" src="../assets/right_arrow.svg">  </div>
       </div>
-      <div class="settings_item">
-        <span>1D Industrial</span>
-        <div class="arrow_settings_container"> <img alt="right icon" src="../assets/right_arrow.svg">  </div>
-      </div>
-
     </div>
-
   </div>
-
 
   <div id="recentScansPopup" v-if="isRecentScansPopupVisible">
       <div class="section_title_container" style="position: relative;" >
@@ -133,35 +126,33 @@
       </div>
 
       <div id="morePopup" v-if="isMorePopupVisible" ref="morePopupRef"> 
-      <div class="more_popup_container">
-        <div class="delete_all_container" :class="{ 'disabled': recentScans.length < 1 }" @click="recentScans.length > 0 ? openConfirmDeletePopup() : null">
-          <img alt="delete icon" src="../assets/delete.svg" />
-          <span>Delete All</span>
-        </div>
-      </div>
-
-  </div>
-      <div class="recent_scans_container">
-      <div v-if="recentScans.length > 0" class="recent_scans_list">
-        <div v-for="(scan, index) in recentScans" :key="index" class="recent_scan_item" @click="openBarcodeDetailsPopup(scan, index)">
-          <div class="recent_scan_details">
-            <div class="recent_scan_barcode_icon">
-              <img alt="barcode icon" src="../assets/1d-barcode.svg" />
-            </div>
-            <div class="recent_text_info">
-              <span class="recent_scan_title">{{ scan.textualData }}</span>
-              <span class="recent_scan_subtitle">{{ scan.type }}</span>
-            </div>
+        <div class="more_popup_container">
+          <div class="delete_all_container" :class="{ 'disabled': recentScans.length < 1 }" @click="recentScans.length > 0 ? openConfirmDeletePopup() : null">
+            <img alt="delete icon" src="../assets/delete.svg" />
+            <span>Delete All</span>
           </div>
         </div>
       </div>
-      <div v-else>
-        <p>No recent scans.</p>
+
+      <div class="recent_scans_container">
+        <div v-if="recentScans.length > 0" class="recent_scans_list">
+          <div v-for="(scan, index) in recentScans" :key="index" class="recent_scan_item" @click="openBarcodeDetailsPopup(scan, index)">
+            <div class="recent_scan_details">
+              <div class="recent_scan_barcode_icon">
+                <img alt="barcode icon" src="../assets/1d-barcode.svg" />
+              </div>
+              <div class="recent_text_info">
+                <span class="recent_scan_title">{{ scan.textualData }}</span>
+                <span class="recent_scan_subtitle">{{ scan.type }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else>
+          <p>No recent scans.</p>
+        </div>
       </div>
-    </div>
-
   </div>
-
 
   <div id="barcodeDetailsPopup" v-if="isBarcodeDetailsPopupVisible">
       <div class="section_title_container" style="position: relative;" >
@@ -198,7 +189,6 @@
       </div>
      </div>
 
-
      <div id="confirmDeletePopup" v-if="isConfirmDeletePopupVisible" class="delete_popup_confirmation">
   <div>
     <h4>This action permanently deletes all recent scans</h4>
@@ -208,8 +198,6 @@
     </div>
   </div>
 </div>
-
-
  
   <div id="webhookConfigPopup" v-if="isWebhookConfigVisible">
     <div class="section_title_container">
@@ -227,7 +215,7 @@
     </div>
   </div>
 
-  <div id="overlay" v-if="isSearchEnginePopupVisible || isConfirmDeletePopupVisible"></div>
+  <div id="overlay" v-if="isSearchEnginePopupVisible || isConfirmDeletePopupVisible || isBarcodesPopupVisible"></div>
   <div id="searchEnginePopup" v-if="isSearchEnginePopupVisible">
     <div style="padding: 8px; height: auto; margin-bottom: 16px;">
       <h3 style="width: 100%; text-align: start; color: #291716; font-size: 24px; margin: 0;">Default Search Engine</h3>
@@ -266,16 +254,58 @@
     </div>
   </div>
 
+  <div
+    id="barcodesPopup"
+    v-if="isBarcodesPopupVisible"
+  >
+    <div style="padding: 8px; height: auto; margin-bottom: 16px;">
+      <h3
+        style="
+          width: 100%;
+          text-align: start;
+          color: #291716;
+          font-size: 24px;
+          margin: 0;
+        "
+      >
+        {{ popupType === '1d' ? '1D Barcodes' : '2D Barcodes' }}
+      </h3>
+    </div>
+
+    <div class="barcode-checkboxes">
+      <div
+        v-for="barcode in filteredBarcodes"
+        :key="barcode.type"
+        class="switch_toggle"
+      >
+        <input
+          type="checkbox"
+          :id="barcode.type"
+          v-model="enabledBarcodes[barcode.type]"
+        />
+        <label :for="barcode.type"></label>
+        <span class="slider"></span>
+        <span class="label_text">{{ barcode.name }}</span>
+      </div>
+    </div>
+
+    <div class="footer_btn_container">
+      <button @click="closeBarcodesPopup">Close</button>
+      <button @click="toggleAllBarcodes">Toggle All</button>
+    </div>
+  </div>
+
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { BarcodeType } from '../../../plugins/barkoder-cordova-plugin/www/BarkoderConfig.js';
+import { ref, onMounted, onUnmounted, reactive, computed } from 'vue';
+import { BarcodeType } from '../plugins/BarkoderConfig.ts';
 
 export default {
   setup() {
     const barkoderViewRef = ref('');
     const scannedResult = ref(null);
+    const recentScans = ref(localStorage.getItem('recentScans') || [])
     const isSettingsPopupVisible = ref(false);
     const isWebhookConfigVisible = ref(false);
     const isSearchEnginePopupVisible = ref(false);
@@ -292,22 +322,83 @@ export default {
     const permanentEngine = ref('google');
     const temporaryEngine = ref('');
     const currentZoomFactor = ref(1.0);
-
     const webhookUrl = ref(localStorage.getItem('webhookUrl') || '');
     const secretWord = ref(localStorage.getItem('secretWord') || '');
-    const recentScans = ref(localStorage.getItem('recentScans') || [])
-
     const morePopupRef = ref(null);
     const detailsMorePopupRef = ref(null);
+    const isBarcodesPopupVisible = ref(false);
+    const popupType = ref(null); // This can hold "1d" or "2d"
     
+    const barcodeTypes = [
+    { name: "QR", type: "qr", mode: "2d" },
+    { name: "Qr Micro", type: "qrMicro",  mode: "2d" },
+    { name: "Aztec Compact", type: "aztecCompact", mode: "2d" },
+    { name: "Aztec", type: "aztec", mode: "2d" },
+    { name: "Datamatrix", type: "datamatrix", mode: "2d" },
+    { name: "Dotcode", type: "dotcode", mode: "2d" },
+    { name: "Code 128", type: "code128",  mode: "1d" },
+    { name: "Code 93", type: "code93",  mode: "1d" },
+    { name: "Code 39", type: "code39",  mode: "1d" },
+    { name: "Codabar", type: "codabar",  mode: "1d" },
+    { name: "Code 11", type: "code11",  mode: "1d" },
+    { name: "Ean 8", type: "ean8",  mode: "1d" },
+    { name: "Ean 13", type: "ean13",  mode: "1d" },
+    { name: "Msi", type: "msi",  mode: "1d" },
+    { name: "UpcA", type: "upcA",  mode: "1d" },
+    { name: "UpcE", type: "upcE",  mode: "1d" },
+    { name: "PDF 417", type: "pdf417",  mode: "2d" },
+    { name: "Databar 14", type: "databar14",  mode: "1d" },
+    { name: "Databar Limited", type: "databarLimited",  mode: "1d" },
+    { name: "Databar Expanded", type: "databarExpanded",  mode: "1d" },
+    { name: "Postal IMB", type: "postalIMB",  mode: "1d" },
+    { name: "Postnet", type: "postnet",  mode: "1d" },
+    { name: "Planet", type: "planet",  mode: "1d" },
+    { name: "Australian Post", type: "australianPost",  mode: "1d" },
+    { name: "Royal Mail", type: "royalMail",  mode: "1d" },
+    { name: "KIX", type: "kix",  mode: "1d" },
+    { name: "Japanese Post", type: "japanesePost",  mode: "1d" }
+  ];
 
+    const handleOpenCodesPopup = (type) => {
+      popupType.value = type;
+      isBarcodesPopupVisible.value = true;
+    };
+
+    const closeBarcodesPopup = () => {
+      isBarcodesPopupVisible.value = false;
+    };
+
+    const enabledBarcodes = reactive(
+      barcodeTypes.reduce((acc, barcode) => {
+        acc[barcode.type] = true;
+          return acc;
+      }, {})
+    );
+
+    const filteredBarcodes = computed(() => {
+      return barcodeTypes.filter(barcode => barcode.mode === popupType.value);
+    });
+
+    const handleBarcodeToggle = (barcodeType) => {
+      enabledBarcodes[barcodeType] = !enabledBarcodes[barcodeType];
+    };
+
+    const toggleAllBarcodes = () => {
+      const shouldEnableAll = Object.values(enabledBarcodes).includes(false);
+      const newEnabledState = Object.fromEntries(
+        barcodeTypes.map((barcode) => [barcode.type, shouldEnableAll])
+      );
+      Object.assign(enabledBarcodes, newEnabledState);
+    };
+    
     const setActiveBarcodeTypes = async () => {
       try {
-        await window.Barkoder.setBarcodeTypeEnabled(BarcodeType.code128, true );
-        await window.Barkoder.setBarcodeTypeEnabled(BarcodeType.ean13, true);
+      Object.keys(enabledBarcodes).forEach((barcodeType) => {
+        const isEnabled = enabledBarcodes[barcodeType];
+        window.Barkoder.setBarcodeTypeEnabled(BarcodeType[barcodeType], isEnabled);
+      });
       } catch (error) {
-        console.error('Error setting active barcode types:', error);
-        throw error; 
+        console.error("Error setting active barcode types:", error);
       }
     };
 
@@ -315,11 +406,15 @@ export default {
       try {
         window.Barkoder.setRegionOfInterestVisible(true);
         window.Barkoder.setRegionOfInterest(5, 30, 90, 40);
-        window.Barkoder.setCloseSessionOnResultEnabled( false );
-        window.Barkoder.setImageResultEnabled( true );
-        window.Barkoder.setBarcodeThumbnailOnResultEnabled( true );
-        window.Barkoder.setBeepOnSuccessEnabled( true );
-        window.Barkoder.setPinchToZoomEnabled( true );
+        window.Barkoder.setCloseSessionOnResultEnabled(true);
+        window.Barkoder.setMaximumResultsCount(200);
+        window.Barkoder.setImageResultEnabled(true);
+        window.Barkoder.setLocationInImageResultEnabled(true);
+        window.Barkoder.setLocationInPreviewEnabled(true);
+        window.Barkoder.setBarcodeThumbnailOnResultEnabled(true);
+        window.Barkoder.setBeepOnSuccessEnabled(true);
+        window.Barkoder.setVibrateOnSuccessEnabled(true);
+        window.Barkoder.setPinchToZoomEnabled(true);
         window.Barkoder.setZoomFactor(currentZoomFactor.value);
       } catch (error) {
         console.error('Error setting Barkoder settings:', error);
@@ -351,9 +446,7 @@ export default {
 
       try {
         const boundingRect = await barkoderViewRef.value.getBoundingClientRect();
-
-        window.Barkoder.registerWithLicenseKey('Your_license_key');
-        
+        window.Barkoder.registerWithLicenseKey('YOUR_LICENSE_KEY');
         await new Promise((resolve, reject) => {
           window.Barkoder.initialize(
              Math.round(boundingRect.width),
@@ -368,42 +461,45 @@ export default {
             }
           );
         });
-
         await setBarkoderSettings();
-
         await setActiveBarcodeTypes();
-
         document.addEventListener('deviceready', () => {
           if (window.Barkoder) {
             window.Barkoder.startScanning(
-        (barkoderResult) => {
-          const randomId = Math.floor(Math.random() * 1000000); 
-
-          scannedResult.value = {
-            id: randomId,
-            textualData: barkoderResult.textualData,
-            type: barkoderResult.barcodeTypeName,
-            resultImage: "data:image/jpeg;base64," + barkoderResult.resultImageAsBase64,
-            thumbnailImage: "data:image/jpeg;base64," + barkoderResult.resultThumbnailAsBase64,
-        };
-
-        window.Barkoder.stopScanning();
-        isScanning.value = false;
-
-        recentScans.value.push(scannedResult.value);
-        localStorage.setItem('recentScans', JSON.stringify(recentScans.value));
-        
-      },
-      (error) => {
-        console.error('Scanning error:', error);
-      }
-    );
+              (barkoderResult) => {
+                const randomId = Math.floor(Math.random() * 1000000);
+                if (barkoderResult) {
+                  window.Barkoder.stopScanning();
+                  isScanning.value = false;
+                }
+                scannedResult.value = {
+                  id: randomId,
+                  textualData: barkoderResult.decoderResults[0].textualData || 'No data available',
+                  type: barkoderResult.decoderResults[0].barcodeTypeName || 'Unknown type',
+                  resultImage: `data:image/jpeg;base64,${barkoderResult.resultImageAsBase64 || ''}`,
+                  thumbnailImage: `data:image/jpeg;base64,${barkoderResult.resultThumbnailsAsBase64[0] || ''}`,
+                };
+                const results = barkoderResult.decoderResults.map((decoderResult) => ({
+                  id: randomId,
+                  textualData: decoderResult.textualData || 'No data available',
+                  type: decoderResult.barcodeTypeName || 'Unknown type',
+                }));
+                recentScans.value.push(...results);
+                localStorage.setItem('recentScans', JSON.stringify(recentScans.value));
+              },
+              (error) => {
+                console.error('Scanning error:', error);
+                isScanning.value = false;
+              }
+            );
           } else {
             console.error('BarkoderScanner plugin not available');
+            isScanning.value = false;
           }
         }, false);
       } catch (error) {
-        alert('Error: ' + error);
+        alert(`Error: ${error}`);
+        isScanning.value = false;
       }
     };
 
@@ -545,7 +641,6 @@ const saveSelectedEngine = () => {
          if (!response.ok) {
            throw new Error(`Network response was not ok. Status: ${response.statusText}`);
          }
-       
          const result = await response.json();
          alert('Webhook response: ' + JSON.stringify(result));
        } catch (error) {
@@ -688,7 +783,16 @@ const saveSelectedEngine = () => {
       detailsMorePopupRef,
       deleteScannedBarcode,
       openDetailsMorePopup,
-      closeDetailsMorePopup
+      closeDetailsMorePopup,
+      handleOpenCodesPopup,
+      closeBarcodesPopup,
+      toggleAllBarcodes,
+      isBarcodesPopupVisible,
+      handleBarcodeToggle,
+      filteredBarcodes,
+      popupType,
+      barcodeTypes,
+      enabledBarcodes
     };
   }
 };
@@ -1042,6 +1146,20 @@ const saveSelectedEngine = () => {
   text-align: center;
 }
 
+.result_desc {
+  word-wrap: break-word;
+  white-space: normal; 
+  overflow-wrap: break-word; 
+}
+
+.result_link {
+  display: inline-block; 
+  word-wrap: break-word;
+  overflow-wrap: break-word; 
+  max-width: 100%; 
+  text-decoration: none; 
+}
+
 .click_btn {
   border: 2px solid #e31c30;
   border-radius: 8px;
@@ -1063,6 +1181,8 @@ const saveSelectedEngine = () => {
 
 .recent_scans_container {
   width: 100%;
+  height: 100%;
+  overflow-y: scroll;
   padding: 0 20px;
 }
 
@@ -1172,8 +1292,6 @@ const saveSelectedEngine = () => {
   border-color: #E52E4C;
 }
 
-
-
 .engine_checkbox_container input[type="radio"]:checked + label::after {
   content: '';
   position: absolute;
@@ -1219,9 +1337,19 @@ const saveSelectedEngine = () => {
   gap: 16px;
 }
 
+.recent_scan_title {
+  width: fit-content;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 1; 
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+}
+
 .recent_text_info {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; 
   align-items: self-start;
 }
 
@@ -1357,5 +1485,80 @@ const saveSelectedEngine = () => {
   gap: 5px;
   padding: 0 16px;
   border-bottom: 1px solid #fff2f4;
+}
+
+.recent_scans_container {
+  height: 100%;
+  overflow-y: scroll
+}
+
+#barcodesPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 16px;
+    z-index: 1001; 
+    width: 320px;
+    min-width: 300px;
+    max-width: 560px;
+    background: #FFFAFA;
+    border-radius: 28px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.barcode-checkboxes {
+  max-width: 438px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 8px;
+  grid-row-gap: 8px;
+}
+
+.barcode-checkboxes div {
+  margin: 5px 0;
+}
+
+.switch_toggle {
+  text-align: start;
+  display: flex;
+}
+
+.switch_toggle input[type="checkbox"] {
+  display: none;
+}
+
+.switch_toggle label {
+  position: relative;
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 10px;
+  border: 2px solid #d3d3d3;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: border 0.3s, background-color 0.3s;
+}
+
+.switch_toggle input[type="checkbox"]:checked + label {
+  border-color: #d32f2f;
+  background-color: #d32f2f;
+}
+
+.switch_toggle input[type="checkbox"]:checked + label::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 6px;
+  height: 6px;
+  background-color: white;
+  border-radius: 50%;
+}
+
+.label_text {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
 }
 </style>

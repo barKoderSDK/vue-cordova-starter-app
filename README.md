@@ -89,21 +89,56 @@ Cordova is a cross-platform app runtime that makes it easy to build web apps tha
    Update the Vue.js project's build configuration to output to the www directory, which is used by Cordova for building mobile applications.
    Edit vue.config.js in your Vue.js project (src) to set the output directory to ../www:
   ```bash
-   module.exports = {
-    outputDir: '../www',
-    // other configurations as needed
-  };
+  module.exports = {
+  outputDir: '../www',
+  publicPath: './',
+  chainWebpack: config => {
+    config.module
+      .rule('typescript')
+      .test(/\.ts$/)
+      .use('ts-loader')
+      .loader('ts-loader')
+      .end();
+  }
+};
    ```
-7. **Build Vue.js Application:**
+7. **Configure typescript - create or update tsconfig.json file in vue app root folder:**
+  ```bash
+  {
+    "compilerOptions": {
+      "target": "es5",
+      "lib": ["dom", "es2015"],
+      "allowJs": true,
+      "jsx": "preserve",
+      "module": "esnext",
+      "moduleResolution": "node",
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true
+    },
+    "include": [
+      "src/**/*.ts",
+      "src/**/*.d.ts",
+      "src/**/*.tsx",
+      "src/**/*.vue"
+    ],
+    "exclude": [
+      "node_modules"
+    ]
+  }
+  ```
+   
+8. **Build Vue.js Application:**
   ```bash
    cd vue_app
   npm run build
    ```
-8. **Make sure cordova.js script is included in public/index.html:**
+9. **Make sure cordova.js script is included in public/index.html:**
   ```bash
       <script src="cordova.js"></script>
    ```
-9. **Test and Run Your App:**
+10. **Test and Run Your App:**
     > back to cordova project root
   ```bash
     cd .. 
@@ -123,35 +158,78 @@ Cordova is a cross-platform app runtime that makes it easy to build web apps tha
 
   ```bash
   <script>
-    import { ref, onMounted } from 'vue';
-    import { BarcodeType } from '../../../plugins/barkoder-cordova-plugin/www/BarkoderConfig.js';
+    import { ref, onMounted, reactive } from 'vue';
+    import { BarcodeType } from '../plugins/BarkoderConfig.ts';
 
 export default {
   setup() {
     const barkoderViewRef = ref('');
     const scannedResult = ref(null);
     const isScanning = ref(false);
+    const recentScans = ref(localStorage.getItem('recentScans') || [])
+
+    const barcodeTypes = [
+      { name: "QR", type: "qr", mode: "2d" },
+      { name: "Qr Micro", type: "qrMicro",  mode: "2d" },
+      { name: "Aztec Compact", type: "aztecCompact", mode: "2d" },
+      { name: "Aztec", type: "aztec", mode: "2d" },
+      { name: "Datamatrix", type: "datamatrix", mode: "2d" },
+      { name: "Dotcode", type: "dotcode", mode: "2d" },
+      { name: "Code 128", type: "code128",  mode: "1d" },
+      { name: "Code 93", type: "code93",  mode: "1d" },
+      { name: "Code 39", type: "code39",  mode: "1d" },
+      { name: "Codabar", type: "codabar",  mode: "1d" },
+      { name: "Code 11", type: "code11",  mode: "1d" },
+      { name: "Ean 8", type: "ean8",  mode: "1d" },
+      { name: "Ean 13", type: "ean13",  mode: "1d" },
+      { name: "Msi", type: "msi",  mode: "1d" },
+      { name: "UpcA", type: "upcA",  mode: "1d" },
+      { name: "UpcE", type: "upcE",  mode: "1d" },
+      { name: "PDF 417", type: "pdf417",  mode: "2d" },
+      { name: "Databar 14", type: "databar14",  mode: "1d" },
+      { name: "Databar Limited", type: "databarLimited",  mode: "1d" },
+      { name: "Databar Expanded", type: "databarExpanded",  mode: "1d" },
+      { name: "Postal IMB", type: "postalIMB",  mode: "1d" },
+      { name: "Postnet", type: "postnet",  mode: "1d" },
+      { name: "Planet", type: "planet",  mode: "1d" },
+      { name: "Australian Post", type: "australianPost",  mode: "1d" },
+      { name: "Royal Mail", type: "royalMail",  mode: "1d" },
+      { name: "KIX", type: "kix",  mode: "1d" },
+      { name: "Japanese Post", type: "japanesePost",  mode: "1d" }
+    ];
+
+     const enabledBarcodes = reactive(
+      barcodeTypes.reduce((acc, barcode) => {
+        acc[barcode.type] = true;
+          return acc;
+      }, {})
+    );
 
     const setActiveBarcodeTypes = async () => {
       try {
-        await window.Barkoder.setBarcodeTypeEnabled(BarcodeType.code128, true );
-        await window.Barkoder.setBarcodeTypeEnabled(BarcodeType.ean13, true);
+      Object.keys(enabledBarcodes).forEach((barcodeType) => {
+        const isEnabled = enabledBarcodes[barcodeType];
+        window.Barkoder.setBarcodeTypeEnabled(BarcodeType[barcodeType], isEnabled);
+      });
       } catch (error) {
-        console.error('Error setting active barcode types:', error);
-        throw error; 
+        console.error("Error setting active barcode types:", error);
       }
     };
 
     const setBarkoderSettings = async () => {
       try {
         window.Barkoder.setRegionOfInterestVisible(true);
-        window.Barkoder.setRegionOfInterest(5, 5, 90, 90);
-        window.Barkoder.setCloseSessionOnResultEnabled( false );
-        window.Barkoder.setImageResultEnabled( true );
-        window.Barkoder.setBarcodeThumbnailOnResultEnabled( true );
-        window.Barkoder.setBeepOnSuccessEnabled( true );
-        window.Barkoder.setPinchToZoomEnabled( true );
-        window.Barkoder.setZoomFactor( 2.0 );
+        window.Barkoder.setRegionOfInterest(5, 30, 90, 40);
+        window.Barkoder.setCloseSessionOnResultEnabled(true);
+        window.Barkoder.setMaximumResultsCount(200);
+        window.Barkoder.setImageResultEnabled(true);
+        window.Barkoder.setLocationInImageResultEnabled(true);
+        window.Barkoder.setLocationInPreviewEnabled(true);
+        window.Barkoder.setBarcodeThumbnailOnResultEnabled(true);
+        window.Barkoder.setBeepOnSuccessEnabled(true);
+        window.Barkoder.setVibrateOnSuccessEnabled(true);
+        window.Barkoder.setPinchToZoomEnabled(true);
+        window.Barkoder.setZoomFactor(currentZoomFactor.value);
       } catch (error) {
         console.error('Error setting Barkoder settings:', error);
         throw error; 
@@ -159,18 +237,11 @@ export default {
     };
 
     const startScanning = async () => {
-      scannedResult.value = {
-        textualData: null,
-        type: null,
-        thumbnailImage: null,
-      };
+      scannedResult.value = null;
       isScanning.value = true;
-
       try {
         const boundingRect = await barkoderViewRef.value.getBoundingClientRect();
-
-        window.Barkoder.registerWithLicenseKey('your_license_key');
-
+        window.Barkoder.registerWithLicenseKey('YOUR_LICENSE_KEY');
         await new Promise((resolve, reject) => {
           window.Barkoder.initialize(
              Math.round(boundingRect.width),
@@ -185,34 +256,45 @@ export default {
             }
           );
         });
-
         await setBarkoderSettings();
-
         await setActiveBarcodeTypes();
-
         document.addEventListener('deviceready', () => {
           if (window.Barkoder) {
             window.Barkoder.startScanning(
-        (barkoderResult) => {
-          scannedResult.value = {
-            textualData: barkoderResult.textualData,
-            type: barkoderResult.barcodeTypeName,
-            resultImage: "data:image/jpeg;base64," + barkoderResult.resultImageAsBase64,
-            thumbnailImage: "data:image/jpeg;base64," + barkoderResult.resultThumbnailAsBase64,
-        };
-        window.Barkoder.stopScanning();
-        isScanning.value = false;
-      },
-      (error) => {
-        console.error('Scanning error:', error);
-      }
-    );
+              (barkoderResult) => {
+                const randomId = Math.floor(Math.random() * 1000000);
+                if (barkoderResult) {
+                  window.Barkoder.stopScanning();
+                  isScanning.value = false;
+                }
+                scannedResult.value = {
+                  id: randomId,
+                  textualData: barkoderResult.decoderResults[0].textualData || 'No data available',
+                  type: barkoderResult.decoderResults[0].barcodeTypeName || 'Unknown type',
+                  resultImage: `data:image/jpeg;base64,${barkoderResult.resultImageAsBase64 || ''}`,
+                  thumbnailImage: `data:image/jpeg;base64,${barkoderResult.resultThumbnailsAsBase64[0] || ''}`,
+                };
+                const results = barkoderResult.decoderResults.map((decoderResult) => ({
+                  id: randomId,
+                  textualData: decoderResult.textualData || 'No data available',
+                  type: decoderResult.barcodeTypeName || 'Unknown type',
+                }));
+                recentScans.value.push(...results);
+                localStorage.setItem('recentScans', JSON.stringify(recentScans.value));
+              },
+              (error) => {
+                console.error('Scanning error:', error);
+                isScanning.value = false;
+              }
+            );
           } else {
             console.error('BarkoderScanner plugin not available');
+            isScanning.value = false;
           }
         }, false);
       } catch (error) {
-        alert('Error: ' + error);
+        alert(`Error: ${error}`);
+        isScanning.value = false;
       }
     };
 
@@ -229,8 +311,9 @@ export default {
       }, false);
     };
 
-    onMounted(() => {
+     onMounted(() => {
       barkoderViewRef.value = document.getElementById('barkoderView');
+      recentScans.value = JSON.parse(localStorage.getItem('recentScans') || '[]');
     });
 
     return {
@@ -238,7 +321,9 @@ export default {
       startScanning,
       stopScanning,
       scannedResult,
-      isScanning
+      isScanning,
+      recentScans,
+      enabledBarcodes
     };
   }
 };
