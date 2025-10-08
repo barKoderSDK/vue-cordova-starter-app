@@ -13,7 +13,6 @@
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
   "devDependencies": {
-    "barkoder-cordova": "^1.6.3",
     "typescript": "^5.5.3"
   },
   "cordova": {
@@ -25,6 +24,7 @@
     }
   },
   "dependencies": {
+    "barkoder-cordova": "^1.6.6",
     "cordova-android": "^13.0.0",
     "ts-loader": "^9.5.1"
   }
