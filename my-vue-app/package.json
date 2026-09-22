@@ -3,15 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prebuild": "ncp ../plugins/barkoder-cordova-plugin/www src/plugins",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "prestart": "ncp ../plugins/barkoder-cordova-plugin/www src/plugins"
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^3.8.3",
-    "vue": "^3.2.13"
+    "vue": "^3.2.13",
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

@@ -24,7 +24,7 @@
     }
   },
   "dependencies": {
-    "barkoder-cordova": "^1.6.6",
+    "barkoder-cordova": "^1.7.2",
     "cordova-android": "^13.0.0",
     "ts-loader": "^9.5.1"
   }
